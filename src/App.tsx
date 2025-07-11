@@ -16,6 +16,7 @@ import Import from "./pages/Import";
 import SearchPage from "./pages/SearchPage";
 import Settings from "./pages/Settings";
 import ManagePage from "./pages/ManagePage";
+import WorkflowsPage from "./pages/WorkflowsPage";
 import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
@@ -99,6 +100,14 @@ const AppRoutes = () => {
         element={
           <PageTransition>
             <Settings />
+          </PageTransition>
+        } 
+      />
+      <Route 
+        path="/workflows" 
+        element={
+          <PageTransition>
+            <WorkflowsPage />
           </PageTransition>
         } 
       />

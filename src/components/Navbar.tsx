@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, LogIn, Search, Upload, User, Settings, LogOut, Moon, Sun, Table, Info, HelpCircle, Code } from 'lucide-react';
+import { Brain, LogIn, Search, Upload, User, Settings, LogOut, Moon, Sun, Table, Info, HelpCircle, Code, Workflow } from 'lucide-react';
 import { useRippleEffect } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -143,6 +143,7 @@ export const Navbar = () => {
   
   const authNavItems = [
     { to: '/manage', icon: <Table size={20} />, label: 'Manage', id: 'manage' },
+    { to: '/workflows', icon: <Workflow size={20} />, label: 'Workflows', id: 'workflows' },
     { to: '/search', icon: <Search size={20} />, label: 'Search', id: 'search' },
     { to: '/import', icon: <Upload size={20} />, label: 'Import', id: 'import' },
     { to: '/profile', icon: <User size={20} />, label: 'Profile', id: 'profile' },
