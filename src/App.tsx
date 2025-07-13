@@ -17,6 +17,7 @@ import SearchPage from "./pages/SearchPage";
 import Settings from "./pages/Settings";
 import ManagePage from "./pages/ManagePage";
 import WorkflowsPage from "./pages/WorkflowsPage";
+import MindMapPage from "./pages/MindMapPage";
 import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
@@ -108,6 +109,14 @@ const AppRoutes = () => {
         element={
           <PageTransition>
             <WorkflowsPage />
+          </PageTransition>
+        } 
+      />
+      <Route 
+        path="/mindmap" 
+        element={
+          <PageTransition>
+            <MindMapPage />
           </PageTransition>
         } 
       />
