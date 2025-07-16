@@ -17,13 +17,24 @@ interface TableViewProps {
   items: CortexItem[];
   selectedItems?: string[];
   onSelectItem?: (id: string) => void;
+  sortBy?: { field: string; direction: 'asc' | 'desc' };
+  onSortChange?: (sort: { field: string; direction: 'asc' | 'desc' }) => void;
 }
 
 const TableView = ({ 
   items, 
   selectedItems = [], 
-  onSelectItem = () => {} 
+  onSelectItem = () => {},
+  sortBy,
+  onSortChange
 }: TableViewProps) => {
+
+  const handleSort = (field: string) => {
+    if (!onSortChange || !sortBy) return;
+    
+    const direction = sortBy.field === field && sortBy.direction === 'asc' ? 'desc' : 'asc';
+    onSortChange({ field, direction });
+  };
   return (
     <Table>
       <TableHeader>
@@ -34,8 +45,19 @@ const TableView = ({
               <div className="flex items-center">
                 {column.name}
                 {column.sortable && (
-                  <Button variant="ghost" size="sm" className="ml-1 h-6 w-6 p-0">
-                    <ArrowUpDown size={14} />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="ml-1 h-6 w-6 p-0 hover:bg-muted transition-colors"
+                    onClick={() => handleSort(column.id)}
+                  >
+                    <ArrowUpDown 
+                      size={14} 
+                      className={cn(
+                        "transition-colors duration-200",
+                        sortBy?.field === column.id && "text-primary"
+                      )}
+                    />
                   </Button>
                 )}
               </div>
