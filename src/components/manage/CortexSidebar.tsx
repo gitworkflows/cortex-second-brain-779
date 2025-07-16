@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Folder, Share, Users, Lock, Plus, Move } from 'lucide-react';
+import { Folder, Share, Users, Lock, Plus, Move, Network } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type CortexCategory = {
@@ -27,6 +27,17 @@ const CortexSidebar = ({
   selectedItemId = 'overview' 
 }: CortexSidebarProps) => {
   const categories: CortexCategory[] = [
+    {
+      id: 'mcp',
+      name: 'MCP',
+      icon: <Network size={16} className="text-purple-500" />,
+      items: [
+        { id: 'mcp-servers', name: 'MCP Servers' },
+        { id: 'mcp-tools', name: 'Connected Tools' },
+        { id: 'mcp-resources', name: 'Data Sources' },
+        { id: 'mcp-settings', name: 'Protocol Settings' },
+      ]
+    },
     {
       id: 'shared',
       name: 'Shared',
