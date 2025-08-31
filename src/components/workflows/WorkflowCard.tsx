@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Play, Edit, ExternalLink, User, Terminal } from 'lucide-react';
+import { Copy, Play, Edit, ExternalLink, User, Terminal, Loader2 } from 'lucide-react';
 import { ParsedWorkflow } from '@/types/workflow';
 import { extractArguments, replaceArguments } from '@/utils/workflowUtils';
 import { toast } from 'sonner';
@@ -26,6 +26,8 @@ export function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
   const [showExecuteDialog, setShowExecuteDialog] = useState(false);
   const [argumentValues, setArgumentValues] = useState<Record<string, string>>({});
   const [finalCommand, setFinalCommand] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
 
   const commandArguments = extractArguments(workflow.command);
 
@@ -48,16 +50,29 @@ export function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
     setFinalCommand(replaceArguments(workflow.command, newValues));
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+  const copyToClipboard = async (text: string) => {
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy to clipboard');
+    } finally {
+      setTimeout(() => setIsCopying(false), 500);
+    }
   };
 
-  const executeCommand = () => {
+  const executeCommand = async () => {
+    setIsExecuting(true);
     const command = replaceArguments(workflow.command, argumentValues);
-    copyToClipboard(command);
-    setShowExecuteDialog(false);
-    toast.success('Command copied to clipboard - paste in your terminal');
+    
+    try {
+      await copyToClipboard(command);
+      setShowExecuteDialog(false);
+      toast.success('Command copied to clipboard - paste in your terminal');
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   return (
@@ -79,8 +94,13 @@ export function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
                 size="sm" 
                 variant="outline" 
                 onClick={() => copyToClipboard(workflow.command)}
+                disabled={isCopying}
               >
-                <Copy className="h-4 w-4" />
+                {isCopying ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </Button>
               {onEdit && (
                 <Button size="sm" variant="outline" onClick={() => onEdit(workflow)}>
@@ -215,9 +235,22 @@ export function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
               <Button variant="outline" onClick={() => setShowExecuteDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={executeCommand}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy & Execute
+              <Button 
+                onClick={executeCommand}
+                disabled={isExecuting}
+                className={isExecuting ? 'animate-pulse' : ''}
+              >
+                {isExecuting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Executing...
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy & Execute
+                  </>
+                )}
               </Button>
             </div>
           </div>

@@ -7,9 +7,10 @@ import { Chat, ChatMessage } from '@/types/chat';
 
 interface ChatMessagesProps {
   activeChat: Chat | null;
+  isTyping?: boolean;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ activeChat }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ activeChat, isTyping = false }) => {
   return (
     <div className="flex-1 overflow-y-auto p-4">
       <AnimatedTransition
@@ -62,7 +63,24 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ activeChat }) => {
           </div>
         ))}
         
-        {activeChat?.messages.length > 0 && activeChat.messages[activeChat.messages.length - 1].type === 'assistant' && (
+        {/* Typing indicator */}
+        {isTyping && (
+          <div className="flex gap-3 p-4 rounded-lg bg-muted/10 mr-auto max-w-[80%] animate-fade-in">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-secondary/20">
+              <Bot size={16} className="text-secondary" />
+            </div>
+            <div className="flex-1 flex items-center gap-1">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+              <span className="text-xs text-muted-foreground ml-2">AI is thinking...</span>
+            </div>
+          </div>
+        )}
+        
+        {activeChat?.messages.length > 0 && activeChat.messages[activeChat.messages.length - 1].type === 'assistant' && !isTyping && (
           <div className="p-4 glass-panel rounded-xl space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Suggested Results</h3>
             <div className="space-y-3">

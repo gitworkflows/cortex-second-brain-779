@@ -69,9 +69,9 @@ const NavItem = ({ to, icon, label, active, onClick, hasSubmenu, children }: Nav
           to={to} 
           className={cn(
             "relative flex items-center justify-center px-4 py-3 rounded-lg transition-all duration-300",
-            "hover:bg-primary/10 hover:text-primary",
-            "overflow-hidden",
-            active ? "bg-primary/10 text-primary" : "text-foreground/80"
+            "hover:bg-primary/10 hover:text-primary hover:scale-105 hover:shadow-sm",
+            "overflow-hidden group",
+            active ? "bg-primary/10 text-primary shadow-sm scale-105" : "text-foreground/80"
           )}
           onClick={(e) => {
             handleRipple(e);
@@ -79,13 +79,16 @@ const NavItem = ({ to, icon, label, active, onClick, hasSubmenu, children }: Nav
           }}
         >
           <span className={cn(
-            "transition-all duration-300",
+            "transition-all duration-300 group-hover:scale-110",
             active ? "text-primary" : "text-foreground/60"
           )}>
             {icon}
           </span>
           {active && (
-            <span className="ml-2 font-medium">{label}</span>
+            <span className="ml-2 font-medium animate-fade-in">{label}</span>
+          )}
+          {active && (
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full animate-scale-in" />
           )}
         </Link>
       </TooltipTrigger>

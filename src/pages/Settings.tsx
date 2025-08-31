@@ -1,14 +1,57 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AnimatedTransition } from '@/components/AnimatedTransition';
 import { useAnimateIn } from '@/lib/animations';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useTheme } from '@/contexts/ThemeContext';
+import { Save, RefreshCw } from 'lucide-react';
 
 const Settings = () => {
   const showContent = useAnimateIn(false, 300);
+  const { theme, toggleTheme } = useTheme();
+  const [settings, setSettings] = useState({
+    autoSave: true,
+    notifications: true,
+    aiSuggestions: true,
+    animations: true,
+    compactView: false,
+    googleDrive: false,
+    notion: false,
+    github: false
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const updateSetting = (key: keyof typeof settings, value: boolean) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('Settings saved:', settings);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResetSettings = () => {
+    setSettings({
+      autoSave: true,
+      notifications: true,
+      aiSuggestions: true,
+      animations: true,
+      compactView: false,
+      googleDrive: false,
+      notion: false,
+      github: false
+    });
+  };
   
   return (
     <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
@@ -44,7 +87,11 @@ const Settings = () => {
                         Automatically save changes as you work
                       </p>
                     </div>
-                    <Switch id="auto-save" defaultChecked />
+                    <Switch 
+                      id="auto-save" 
+                      checked={settings.autoSave}
+                      onCheckedChange={(checked) => updateSetting('autoSave', checked)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -54,7 +101,11 @@ const Settings = () => {
                         Receive notifications about updates and activity
                       </p>
                     </div>
-                    <Switch id="notifications" defaultChecked />
+                    <Switch 
+                      id="notifications" 
+                      checked={settings.notifications}
+                      onCheckedChange={(checked) => updateSetting('notifications', checked)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -64,7 +115,11 @@ const Settings = () => {
                         Allow AI to provide content suggestions
                       </p>
                     </div>
-                    <Switch id="ai-suggestions" defaultChecked />
+                    <Switch 
+                      id="ai-suggestions" 
+                      checked={settings.aiSuggestions}
+                      onCheckedChange={(checked) => updateSetting('aiSuggestions', checked)}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -86,7 +141,11 @@ const Settings = () => {
                         Toggle between light and dark themes
                       </p>
                     </div>
-                    <Switch id="dark-mode" defaultChecked />
+                    <Switch 
+                      id="dark-mode" 
+                      checked={theme === 'dark'}
+                      onCheckedChange={toggleTheme}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -96,7 +155,11 @@ const Settings = () => {
                         Enable smooth transitions and animations
                       </p>
                     </div>
-                    <Switch id="animations" defaultChecked />
+                    <Switch 
+                      id="animations" 
+                      checked={settings.animations}
+                      onCheckedChange={(checked) => updateSetting('animations', checked)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -106,7 +169,11 @@ const Settings = () => {
                         Display more content with less spacing
                       </p>
                     </div>
-                    <Switch id="compact-view" />
+                    <Switch 
+                      id="compact-view" 
+                      checked={settings.compactView}
+                      onCheckedChange={(checked) => updateSetting('compactView', checked)}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -128,7 +195,11 @@ const Settings = () => {
                         Import and sync files from Google Drive
                       </p>
                     </div>
-                    <Switch id="google-drive" />
+                    <Switch 
+                      id="google-drive" 
+                      checked={settings.googleDrive}
+                      onCheckedChange={(checked) => updateSetting('googleDrive', checked)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -138,7 +209,11 @@ const Settings = () => {
                         Sync with your Notion workspaces
                       </p>
                     </div>
-                    <Switch id="notion" />
+                    <Switch 
+                      id="notion" 
+                      checked={settings.notion}
+                      onCheckedChange={(checked) => updateSetting('notion', checked)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -148,12 +223,45 @@ const Settings = () => {
                         Connect to your GitHub repositories
                       </p>
                     </div>
-                    <Switch id="github" />
+                    <Switch 
+                      id="github" 
+                      checked={settings.github}
+                      onCheckedChange={(checked) => updateSetting('github', checked)}
+                    />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
+          
+          {/* Save/Reset Actions */}
+          <div className="flex justify-end gap-3 mt-8 p-4 bg-muted/30 rounded-lg">
+            <Button 
+              variant="outline" 
+              onClick={handleResetSettings}
+              disabled={isSaving}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reset to Defaults
+            </Button>
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={isSaving}
+              className={isSaving ? 'animate-pulse' : ''}
+            >
+              {isSaving ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </AnimatedTransition>
     </div>

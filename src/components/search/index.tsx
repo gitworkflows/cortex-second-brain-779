@@ -17,6 +17,8 @@ export const Search: React.FC = () => {
   const [isEditingTitle, setIsEditingTitle] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   
   // Initialize with a sample chat on first render
   useEffect(() => {
@@ -75,7 +77,8 @@ export const Search: React.FC = () => {
   // Handle message submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim() && activeChat) {
+    if (searchQuery.trim() && activeChat && !isLoading) {
+      setIsLoading(true);
       // Create user message
       const userMessage: ChatMessage = {
         id: generateId(),
@@ -107,14 +110,19 @@ export const Search: React.FC = () => {
       
       setChats(updatedChats);
       setSearchQuery('');
+      setIsLoading(false);
       
       // Find the updated active chat
       const updatedActiveChat = updatedChats.find(chat => chat.id === activeChat.id);
       if (updatedActiveChat) {
         setActiveChat(updatedActiveChat);
         
+        // Show typing indicator
+        setIsTyping(true);
+        
         // Add AI response after a short delay
         setTimeout(() => {
+          setIsTyping(false);
           const aiMessage: ChatMessage = {
             id: generateId(),
             type: 'assistant',
@@ -183,7 +191,7 @@ export const Search: React.FC = () => {
         </div>
         
         {/* Chat messages area */}
-        <ChatMessages activeChat={activeChat} />
+        <ChatMessages activeChat={activeChat} isTyping={isTyping} />
         
         {/* Input area */}
         <ChatInput 
@@ -192,6 +200,8 @@ export const Search: React.FC = () => {
           handleSubmit={handleSubmit}
           isFocused={isFocused}
           setIsFocused={setIsFocused}
+          isLoading={isLoading}
+          disabled={isTyping}
         />
       </div>
     </div>

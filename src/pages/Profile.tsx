@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserProfile } from '@/lib/types';
-import { Mail, Save, X, Plus, ExternalLink } from 'lucide-react';
+import { Mail, Save, X, Plus, ExternalLink, Loader2 } from 'lucide-react';
 
 const initialProfile: UserProfile = {
   name: 'Alex Johnson',
@@ -27,15 +27,51 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState<UserProfile>(initialProfile);
   const [tempLink, setTempLink] = useState({ title: '', url: '' });
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const handleEditProfile = () => {
     setTempProfile({...profile});
     setIsEditing(true);
   };
   
-  const handleSaveProfile = () => {
-    setProfile({...tempProfile});
-    setIsEditing(false);
+  const validateProfile = (profile: UserProfile): Record<string, string> => {
+    const errors: Record<string, string> = {};
+    
+    if (!profile.name?.trim()) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!profile.email?.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(profile.email)) {
+      errors.email = 'Email is invalid';
+    }
+    
+    return errors;
+  };
+
+  const handleSaveProfile = async () => {
+    const validationErrors = validateProfile(tempProfile);
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    
+    setIsSaving(true);
+    setErrors({});
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setProfile({...tempProfile});
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   const handleCancelEdit = () => {
@@ -114,20 +150,34 @@ const Profile = () => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input 
+                     <Input 
                       id="name" 
                       value={tempProfile.name}
-                      onChange={(e) => setTempProfile({...tempProfile, name: e.target.value})}
+                      onChange={(e) => {
+                        setTempProfile({...tempProfile, name: e.target.value});
+                        if (errors.name) setErrors({...errors, name: ''});
+                      }}
+                      className={errors.name ? 'border-destructive' : ''}
                     />
+                    {errors.name && (
+                      <p className="text-sm text-destructive">{errors.name}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input 
+                     <Input 
                       id="email" 
                       type="email"
                       value={tempProfile.email}
-                      onChange={(e) => setTempProfile({...tempProfile, email: e.target.value})}
+                      onChange={(e) => {
+                        setTempProfile({...tempProfile, email: e.target.value});
+                        if (errors.email) setErrors({...errors, email: ''});
+                      }}
+                      className={errors.email ? 'border-destructive' : ''}
                     />
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
                   </div>
                 </div>
                 
@@ -189,10 +239,29 @@ const Profile = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancelEdit}>Cancel</Button>
-                <Button onClick={handleSaveProfile}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className={isSaving ? 'animate-pulse' : ''}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>

@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { SearchIcon, SendIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { SearchIcon, SendIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +10,8 @@ interface ChatInputProps {
   handleSubmit: (e: React.FormEvent) => void;
   isFocused: boolean;
   setIsFocused: (focused: boolean) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -17,8 +19,31 @@ const ChatInput: React.FC<ChatInputProps> = ({
   setSearchQuery,
   handleSubmit,
   isFocused,
-  setIsFocused
+  setIsFocused,
+  isLoading = false,
+  disabled = false
 }) => {
+  const [isTyping, setIsTyping] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (searchQuery) {
+      setIsTyping(true);
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 500);
+    } else {
+      setIsTyping(false);
+    }
+    return () => clearTimeout(typingTimeoutRef.current);
+  }, [searchQuery]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  };
   return (
     <div className="p-4 border-t">
       <form 
@@ -37,26 +62,40 @@ const ChatInput: React.FC<ChatInputProps> = ({
             )} 
           />
           <input
+            ref={inputRef}
             type="text"
-            placeholder="Ask your second brain anything..."
-            className="w-full bg-transparent border-none outline-none focus:outline-none text-foreground"
+            placeholder={isLoading ? "Processing..." : "Ask your second brain anything..."}
+            className="w-full bg-transparent border-none outline-none focus:outline-none text-foreground placeholder:transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled || isLoading}
           />
+          
+          {isTyping && !isLoading && (
+            <div className="text-xs text-muted-foreground animate-pulse">
+              Typing...
+            </div>
+          )}
           <Button 
             type="submit"
             size="icon"
             variant="ghost"
             className={cn(
-              "text-muted-foreground transition-all duration-300",
-              searchQuery.trim() ? "opacity-100" : "opacity-50",
-              isFocused && searchQuery.trim() ? "text-primary" : ""
+              "text-muted-foreground transition-all duration-300 hover:bg-primary/10",
+              searchQuery.trim() && !isLoading ? "opacity-100 hover:text-primary" : "opacity-50",
+              isFocused && searchQuery.trim() && !isLoading ? "text-primary" : "",
+              isLoading && "animate-pulse"
             )}
-            disabled={!searchQuery.trim()}
+            disabled={!searchQuery.trim() || isLoading || disabled}
           >
-            <SendIcon size={18} />
+            {isLoading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <SendIcon size={18} />
+            )}
           </Button>
         </div>
       </form>
